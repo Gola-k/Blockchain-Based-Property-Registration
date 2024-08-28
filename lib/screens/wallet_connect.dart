@@ -291,7 +291,7 @@ class _CheckPrivateKeyState extends State<CheckPrivateKey> {
                       context: context, backgroundColor: Colors.red);
                 }
               },
-              style: ElevatedButton.styleFrom(primary: Colors.orange),
+              style: ElevatedButton.styleFrom(foregroundColor: Colors.orange),
               child: Image.network(
                   'https://i0.wp.com/kindalame.com/wp-content/uploads/2021/05/metamask-fox-wordmark-horizontal.png?fit=1549%2C480&ssl=1',
                   width: 280,

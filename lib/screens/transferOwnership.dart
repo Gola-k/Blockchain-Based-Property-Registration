@@ -58,26 +58,64 @@ class _transferOwnershipState extends State<transferOwnership> {
     super.dispose();
   }
 
-  Future<void> uploadDocument(bytes) async {
-    String url = "https://api.nft.storage/upload";
-    var header = {"Authorization": "Bearer $nftStorageApiKey"};
+  Future<void> uploadDocument(Uint8List bytes) async {
+    String url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+    var header = {
+      "pinata_api_key": pinataApiKey,
+      "pinata_secret_api_key": pinataSecretApiKey,
+    };
 
     try {
-      final response =
-          await http.post(Uri.parse(url), headers: header, body: bytes);
-      var data = jsonDecode(response.body);
-      //print(data);
-      if (data['ok']) {
-        var cid = data["value"]["cid"];
-        docUrl = "https://" + cid + ".ipfs.dweb.link";
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers.addAll(header);
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: "document", // You can specify a name for the file here
+        ),
+      );
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      var data = jsonDecode(responseBody);
+
+      if (response.statusCode == 200) {
+        var cid = data["IpfsHash"];
+        docUrl = "https://gateway.pinata.cloud/ipfs/" + cid;
         print(docUrl);
+      } else {
+        print("Failed to upload: ${data['error']}");
+        showToast("Failed to upload document: ${data['error']}",
+            context: context, backgroundColor: Colors.red);
       }
     } catch (e) {
       print(e);
-      showToast("Something went wrong,while document uploading",
+      showToast("Something went wrong while uploading the document",
           context: context, backgroundColor: Colors.red);
     }
   }
+
+  // Future<void> uploadDocument(bytes) async {
+  //   String url = "https://api.nft.storage/upload";
+  //   var header = {"Authorization": "Bearer $nftStorageApiKey"};
+
+  //   try {
+  //     final response =
+  //         await http.post(Uri.parse(url), headers: header, body: bytes);
+  //     var data = jsonDecode(response.body);
+  //     //print(data);
+  //     if (data['ok']) {
+  //       var cid = data["value"]["cid"];
+  //       docUrl = "https://" + cid + ".ipfs.dweb.link";
+  //       print(docUrl);
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //     showToast("Something went wrong,while document uploading",
+  //         context: context, backgroundColor: Colors.red);
+  //   }
+  // }
 
   generateDocument(villegename, price, sellername, buyername, selleraddress,
       buyeraddress, surveyno, area, date, sellerpan, buyerpan) async {

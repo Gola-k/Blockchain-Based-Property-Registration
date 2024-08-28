@@ -187,7 +187,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
         isLoading = false;
       });
     }
-   // screen = 3;
+    // screen = 3;
     isLoading = false;
     setState(() {});
   }
@@ -224,7 +224,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
       setState(() {});
     }
 
-   // screen = 5;
+    // screen = 5;
     isLoading = false;
 
     // SmartDialog.dismiss();
@@ -255,7 +255,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
       setState(() {});
     }
     isLoading = false;
-  //  screen = 4;
+    //  screen = 4;
     setState(() {});
   }
 
@@ -294,33 +294,77 @@ class _UserDashBoardState extends State<UserDashBoard> {
   }
 
   Future<bool> uploadDocument() async {
-    String url = "https://api.nft.storage/upload";
-    var header = {"Authorization": "Bearer $nftStorageApiKey"};
+    String url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+    var header = {
+      "Authorization": "Bearer $pinataApiKey",
+      "pinata_api_key": pinataApiKey,
+      "pinata_secret_api_key": pinataSecretApiKey,
+    };
 
     if (isFilePicked) {
       try {
-        final response = await http.post(Uri.parse(url),
-            headers: header, body: documentFile.bytes);
-        var data = jsonDecode(response.body);
-        //print(data);
-        if (data['ok']) {
-          cid = data["value"]["cid"];
-          docUrl = "https://" + cid + ".ipfs.dweb.link";
+        var request = http.MultipartRequest('POST', Uri.parse(url));
+        request.headers.addAll(header);
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            documentFile.bytes!,
+            filename: docuName,
+          ),
+        );
 
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+        var data = jsonDecode(responseBody);
+
+        if (response.statusCode == 200) {
+          cid = data["IpfsHash"];
+          docUrl = "https://gateway.pinata.cloud/ipfs/" + cid;
           return true;
+        } else {
+          print("Failed to upload: ${data['error']}");
         }
       } catch (e) {
         print(e);
-        showToast("Something went wrong,while document uploading",
+        showToast("Something went wrong while uploading the document",
             context: context, backgroundColor: Colors.red);
       }
     } else {
-      showToast("Choose Document",
+      showToast("Choose a document",
           context: context, backgroundColor: Colors.red);
       return false;
     }
     return false;
   }
+
+  // Future<bool> uploadDocument() async {
+  //   String url = "https://api.nft.storage/upload";
+  //   var header = {"Authorization": "Bearer $nftStorageApiKey"};
+
+  //   if (isFilePicked) {
+  //     try {
+  //       final response = await http.post(Uri.parse(url),
+  //           headers: header, body: documentFile.bytes);
+  //       var data = jsonDecode(response.body);
+  //       //print(data);
+  //       if (data['ok']) {
+  //         cid = data["value"]["cid"];
+  //         docUrl = "https://" + cid + ".ipfs.dweb.link";
+
+  //         return true;
+  //       }
+  //     } catch (e) {
+  //       print(e);
+  //       showToast("Something went wrong,while document uploading",
+  //           context: context, backgroundColor: Colors.red);
+  //     }
+  //   } else {
+  //     showToast("Choose Document",
+  //         context: context, backgroundColor: Colors.red);
+  //     return false;
+  //   }
+  //   return false;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -384,8 +428,7 @@ class _UserDashBoardState extends State<UserDashBoard> {
     );
   }
 
-Widget sentRequest() {
-   
+  Widget sentRequest() {
     return ListView.builder(
       itemCount: sentRequestInfo == null ? 1 : sentRequestInfo.length + 1,
       itemBuilder: (BuildContext context, int index) {
@@ -478,7 +521,8 @@ Widget sentRequest() {
               Expanded(
                   child: Center(
                     child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(primary: Colors.green),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green),
                         onPressed: data[4].toString() != '1'
                             ? null
                             : () async {
@@ -512,7 +556,6 @@ Widget sentRequest() {
   }
 
   Widget receivedRequest() {
-    
     return ListView.builder(
       itemCount:
           receivedRequestInfo == null ? 1 : receivedRequestInfo.length + 1,
@@ -609,8 +652,8 @@ Widget sentRequest() {
               Expanded(
                   child: Center(
                     child: ElevatedButton(
-                        style:
-                            ElevatedButton.styleFrom(primary: Colors.redAccent),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent),
                         onPressed: data[4].toString() != '0'
                             ? null
                             : () async {
@@ -636,7 +679,7 @@ Widget sentRequest() {
                   child: Center(
                     child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: Colors.greenAccent),
+                            backgroundColor: Colors.greenAccent),
                         onPressed: data[4].toString() != '0'
                             ? null
                             : () async {
@@ -664,7 +707,6 @@ Widget sentRequest() {
       },
     );
   }
-
 
   Widget landGallery() {
     if (isLoading) {

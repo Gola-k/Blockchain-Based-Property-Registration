@@ -41,7 +41,8 @@ class LandInfo {
 }
 
 launchUrl(String url) async {
-  url = url.replaceAll('.dweb.', '.nftstorage.');
+  // Replace the URL structure to work with Pinata gateway
+  url = url.replaceAll('.dweb.', '.pinata.cloud/ipfs/');
 
   if (await canLaunch(url)) {
     await launch(
@@ -54,6 +55,21 @@ launchUrl(String url) async {
     throw 'Could not launch $url';
   }
 }
+
+// launchUrl(String url) async {
+//   url = url.replaceAll('.dweb.', '.nftstorage.');
+
+//   if (await canLaunch(url)) {
+//     await launch(
+//       url,
+//       forceSafariVC: false,
+//       forceWebView: false,
+//       headers: <String, String>{'my_header_key': 'my_header_value'},
+//     );
+//   } else {
+//     throw 'Could not launch $url';
+//   }
+// }
 
 getEthToInr() async {
   try {
@@ -76,6 +92,7 @@ Widget CustomButton(text, fun) => Container(
       margin: const EdgeInsets.all(10),
       child: ElevatedButton(
         onPressed: fun,
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Container(
@@ -84,7 +101,7 @@ Widget CustomButton(text, fun) => Container(
               text,
               style: const TextStyle(
                 fontSize: 18,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           ),
@@ -96,7 +113,8 @@ Widget CustomButton2(text, fun) => Container(
       margin: const EdgeInsets.all(10),
       child: ElevatedButton(
         onPressed: fun,
-        //color: Theme.of(context).accentColor,
+        // color: Theme.of(context).accentColor,
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Container(
@@ -105,7 +123,7 @@ Widget CustomButton2(text, fun) => Container(
               text,
               style: const TextStyle(
                 fontSize: 15,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           ),
@@ -117,7 +135,7 @@ Widget CustomButton3(text, fun, color) => Container(
       margin: const EdgeInsets.all(10),
       child: ElevatedButton(
         onPressed: fun,
-        style: ElevatedButton.styleFrom(primary: color),
+        style: ElevatedButton.styleFrom(backgroundColor: color),
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Container(
